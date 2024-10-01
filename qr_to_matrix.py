@@ -32,7 +32,7 @@ def qr_to_color_matrix(image_path, num_colors=2):
 
 # Example usage
 if __name__ == '__main__':
-    image_path = 'path_to_qr_code_image.png'
+    image_path = 'cropped_inner_square.png'
     try:
         color_matrix, colors = qr_to_color_matrix(image_path)
         print("Color Matrix:\n", color_matrix)
