@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import cv2
-from ESW.qr_to_matrix import qr_to_color_matrix
+from qr_to_matrix import qr_to_color_matrix
 
 def generate_colored_image_from_matrix(matrix, colors, output_path):
     # Create an empty image with the same size as the matrix
@@ -20,7 +20,7 @@ def generate_colored_image_from_matrix(matrix, colors, output_path):
 class TestQRToColorMatrix(unittest.TestCase):
 
     def test_colored_qr_code_image(self):
-        # Generate a matrix with values 0, 1, 2, 3, and 4
+        # # Generate a matrix with values 0, 1, 2, 3, and 4
         original_matrix = np.array([
             [0, 1, 2, 3, 4],
             [4, 3, 2, 1, 0],
@@ -29,18 +29,18 @@ class TestQRToColorMatrix(unittest.TestCase):
             [0, 1, 2, 3, 4]
         ])
         
-        # Define the color palette (black, white, blue, red, green)
-        colors = [
-            [0, 0, 0],       # Black
-            [255, 255, 255], # White
-            [0, 0, 255],     # Blue
-            [255, 0, 0],     # Red
-            [0, 255, 0]      # Green
-        ]
+        # # Define the color palette (black, white, blue, red, green)
+        # colors = [
+        #     [0, 0, 0],       # Black
+        #     [255, 255, 255], # White
+        #     [0, 0, 255],     # Blue
+        #     [255, 0, 0],     # Red
+        #     [0, 255, 0]      # Green
+        # ]
         
-        # Generate the colored image from the matrix
-        output_path = 'valid_bw_qr.png'
-        colored_image = generate_colored_image_from_matrix(original_matrix, colors, output_path)
+        # # Generate the colored image from the matrix
+        output_path = 'colored_grid.png'
+        # colored_image = generate_colored_image_from_matrix(original_matrix, colors, output_path)
         
         # Feed the colored image to the qr_to_color_matrix function
         color_matrix, _ = qr_to_color_matrix(output_path, num_colors=5)
