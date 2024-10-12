@@ -2,7 +2,49 @@ import cv2
 import numpy as np
 import os
 
-# Function to find objects with outer blue borders in the image
+# First part: Cropping the image using the blue border
+def find_blue_border(frame):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # Define the HSV range for the blue color
+    lower_blue = np.array([90, 50, 50])  # Adjust if necessary
+    upper_blue = np.array([140, 255, 255])
+    
+    # Create a mask for blue
+    mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+    # Denoise and improve the mask
+    mask = cv2.GaussianBlur(mask, (3, 3), 0)
+    mask = cv2.dilate(mask, None, iterations=1)
+    mask = cv2.erode(mask, None, iterations=1)
+
+    # Find contours
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    largest_contour = None
+    largest_area = 0
+
+    # Find the largest contour
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > largest_area:
+            largest_area = area
+            largest_contour = contour
+
+    return largest_contour
+
+def crop_image_from_blue_border(frame, contour):
+    if contour is not None:
+        # Get the bounding rectangle of the largest contour
+        x, y, w, h = cv2.boundingRect(contour)
+        
+        # Crop the image using the bounding box
+        cropped_image = frame[y:y+h, x:x+w]
+
+        return cropped_image
+    return None
+
+# Second part: Finding objects with outer blue borders
 def find_outer_blue_border_object(frame, min_area):
     # Convert image to HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -39,15 +81,7 @@ def find_outer_blue_border_object(frame, min_area):
 
     return largest_object
 
-def main():
-    # Path to the input image
-    input_image_path = 'cropped_image.png'  # Replace with your input image path
-    frame = cv2.imread(input_image_path)
-    
-    if frame is None:
-        print(f"Failed to load image: {input_image_path}")
-        return
-
+def process_image_for_outer_blue_border(frame):
     # Define the minimum area for detecting the object with an outer blue border
     frame_area = frame.shape[0] * frame.shape[1]
     min_area = frame_area * 0.05  # Adjust this threshold based on the image size
@@ -84,6 +118,35 @@ def main():
             print("Could not approximate to exactly 4 points.")
     else:
         print("No outer blue-border object detected in the image.")
+
+def main():
+    # Load the image file instead of capturing video
+    image_path = 'check3.jpeg'  # Change this to the path of your input image
+    frame = cv2.imread(image_path)
+
+    if frame is None:
+        print("Failed to load image.")
+        return
+    
+    # Find the blue border and crop the image
+    blue_border_contour = find_blue_border(frame)
+
+    if blue_border_contour is not None:
+        cropped_image = crop_image_from_blue_border(frame, blue_border_contour)
+        
+        if cropped_image is not None:
+            # Save the cropped image
+            cropped_image_path = 'cropped_image.png'
+            cv2.imwrite(cropped_image_path, cropped_image)
+            print(f"Cropped image saved at: {cropped_image_path}")
+            
+            # Now process the cropped image for the outer blue border
+            process_image_for_outer_blue_border(cropped_image)
+            
+        else:
+            print("Failed to crop the image.")
+    else:
+        print("No blue border detected.")
 
 if __name__ == "__main__":
     main()

@@ -17,7 +17,7 @@ def is_black(pixel):
     # Define black thresholds based on your HSV observations
     hue, saturation, value = pixel_hsv
     # Conditions based on observed ranges, you can tweak these thresholds as necessary
-    return (value < 0.7) and (saturation < 0.799)  # Low value and low saturation for black
+    return (value < 0.69) and (saturation < 0.8)  # Low value and low saturation for black
 
 def is_white(pixel):
     return pixel[0] > 200 and pixel[1] > 200 and pixel[2] > 200  # White threshold
@@ -60,7 +60,7 @@ def get_dominant_color(cell_pixels):
 
     total_pixels = len(pixel_array)
     for color, count in color_counts.items():
-        if count / total_pixels > 0.43:  # Check for 50% dominance
+        if count / total_pixels > 0.50:  # Check for 50% dominance
             return color
     return '-1'  # Return '-1' if no dominant color
 
@@ -91,7 +91,7 @@ def convert_to_numeric_matrix(color_matrix):
     return numeric_matrix
 
 # Path to the input image
-image_path = "wrapped_square_image.png"  # Replace with your image path
+image_path = "wrapped_square_image2.png"  # Replace with your image path
 color_matrix = divide_image_and_assign_colors(image_path)
 
 # Display the output color matrix
