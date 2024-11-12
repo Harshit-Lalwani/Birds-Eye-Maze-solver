@@ -2,14 +2,15 @@ import cv2
 import numpy as np
 import os
 
-# Function to find objects with blue borders in the image
+# Function to find objects with blue borders in the image using custom HSV values
 def find_blue_border_object(frame, min_area):
     # Convert image to HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
-    # Define range for detecting blue color in the borders (adjusted for more precision)
-    lower_blue = np.array([100, 100, 100])
-    upper_blue = np.array([130, 255, 255])
+    # Define the HSV range based on the provided HSV values
+    # Adjusting the range to cover the values you provided with some margin
+    lower_blue = np.array([94, 130, 150])  # Lower range of HSV based on your values
+    upper_blue = np.array([100, 180, 210])  # Upper range of HSV based on your values
     
     # Create a mask for blue color
     mask = cv2.inRange(hsv, lower_blue, upper_blue)
@@ -56,7 +57,7 @@ def main():
         frame_area = frame.shape[0] * frame.shape[1]
         min_area = frame_area * 0.05  # Adjust this threshold based on the image size
 
-        # Find the object with a blue border
+        # Find the object with a blue border using the updated HSV range
         blue_border_object = find_blue_border_object(frame, min_area)
 
         if blue_border_object is not None:

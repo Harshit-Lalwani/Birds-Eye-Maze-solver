@@ -16,12 +16,16 @@ def draw_graph_with_path_on_image(image, path, matrix):
     # Resize image to fit grid matrix dimensions if needed
     cell_size = image.shape[0] // len(matrix)  # Adjust based on matrix size and image dimensions
 
-    for (i, j) in path:
-        top_left = (j * cell_size, i * cell_size)
-        bottom_right = ((j + 1) * cell_size, (i + 1) * cell_size)
+    # Draw a line between each consecutive point in the path
+    for idx in range(len(path) - 1):
+        (i1, j1), (i2, j2) = path[idx], path[idx + 1]
         
-        # Draw a rectangle at each cell in the path
-        cv2.rectangle(image, top_left, bottom_right, (0, 0, 255), -1)  # Red color with filled rectangle
+        # Calculate the center of each cell
+        start_point = (j1 * cell_size + cell_size // 2, i1 * cell_size + cell_size // 2)
+        end_point = (j2 * cell_size + cell_size // 2, i2 * cell_size + cell_size // 2)
+        
+        # Draw line between points
+        cv2.line(image, start_point, end_point, (0, 0, 255), 5)  # Red color with thickness 2
 
     # Display the result
     plt.figure(figsize=(10, 10))
@@ -29,6 +33,7 @@ def draw_graph_with_path_on_image(image, path, matrix):
     plt.axis('off')
     plt.title("Shortest Path Highlighted on Image")
     plt.show()
+
 
 def is_black(pixel):
     # Convert RGB to HSV
@@ -297,93 +302,7 @@ def wrap_to_square(image, multiple_of=25):
 
     return wrapped_image
 
-def find_blue_border_object(frame, min_area):
-    # Convert image to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
-    # Define the HSV range based on the provided HSV values
-    # Adjusting the range to cover the values you provided with some margin
-    lower_blue = np.array([94, 130, 150])  # Lower range of HSV based on your values
-    upper_blue = np.array([100, 180, 210])  # Upper range of HSV based on your values
-    
-    # Create a mask for blue color
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
-    
-    # Optional: Denoise the mask to remove small noise
-    mask = cv2.GaussianBlur(mask, (3, 3), 0)
-
-    # Find contours in the masked image
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    largest_object = None
-    max_area = 0
-
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if area < min_area:
-            continue
-        
-        # Approximate the contour to get the shape
-        epsilon = 0.01 * cv2.arcLength(contour, True)  # More precise contour approximation
-        approx = cv2.approxPolyDP(contour, epsilon, True)
-
-        # Assuming the object has 4 sides (quadrilateral shape)
-        if len(approx) == 4 and area > max_area:
-            largest_object = approx
-            max_area = area
-
-    return largest_object
-
-
 def main():
-    cap = cv2.VideoCapture(0)
-
-    # Reduce the resolution of the frames for faster processing (optional)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Failed to capture video.")
-            break
-
-        # Define the minimum area for detecting the object with a blue border
-        frame_area = frame.shape[0] * frame.shape[1]
-        min_area = frame_area * 0.05  # Adjust this threshold based on the image size
-
-        # Find the object with a blue border using the updated HSV range
-        blue_border_object = find_blue_border_object(frame, min_area)
-
-        if blue_border_object is not None:
-            # Get the bounding rectangle around the detected object
-            x, y, w, h = cv2.boundingRect(blue_border_object)
-
-            # Crop the image to the bounding rectangle
-            cropped_image = frame[y:y+h, x:x+w]
-
-            # Save the cropped image with the detected blue-border object
-            output_image_path = os.path.join(os.getcwd(), 'cropped_blue_border_object.png')
-            cv2.imwrite(output_image_path, cropped_image)
-            print(f"Cropped image saved at: {output_image_path}")
-
-            # Stop the video feed after finding the object
-            cap.release()
-            cv2.destroyAllWindows()
-            # return
-            break
-        else:
-            print("No blue-border object detected in this frame.")
-
-        # Show the video feed
-        cv2.imshow("Video Feed", frame)
-
-        # Reduce delay to 1 millisecond for faster frame capture
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
     image_path = 'check3.jpeg'
     frame = cv2.imread(image_path)
 
@@ -424,6 +343,7 @@ def main():
                 # Draw the graph and highlight the shortest path
                 draw_graph_with_shortest_path(G, shortest_path,numeric_matrix)
                 print("Shortest path from", start_node, "to", end_node, ":", shortest_path)
+                draw_graph_with_path_on_image(square_image, shortest_path, numeric_matrix)
             else:
                 print("Either the start or end node does not exist in the graph.")
 

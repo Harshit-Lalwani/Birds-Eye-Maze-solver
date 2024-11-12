@@ -242,7 +242,7 @@ def wrap_to_square(image, multiple_of=25):
 
 def main():
     # Load the image file instead of capturing video
-    image_path = 'check3.jpeg'  # Change this to the path of your input image
+    image_path = 'check.jpeg'  # Change this to the path of your input image
     frame = cv2.imread(image_path)
 
     if frame is None:
